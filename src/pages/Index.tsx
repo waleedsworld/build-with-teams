@@ -204,7 +204,40 @@ export function CrmFeatures() {
       )}
     </section>;
 }
+// Lightweight, dependency-free A/B test for the hero copy. A visitor is
+// bucketed once (50/50) and the choice is persisted, so the message stays
+// consistent across reloads while we measure which pitch converts better.
+const heroVariants = [
+  {
+    id: "A",
+    headline: "Team as a Service",
+    subheadline:
+      "On-demand AI + human experts for marketing, development & growth.",
+  },
+  {
+    id: "B",
+    headline: "Ship faster with a team on tap",
+    subheadline:
+      "Spin up designers, engineers & PMs — plus an AI copilot that actually ships.",
+  },
+] as const;
+
+function pickHeroVariant() {
+  if (typeof window === "undefined") return heroVariants[0];
+  try {
+    const stored = window.localStorage.getItem("heroVariant");
+    const found = heroVariants.find((v) => v.id === stored);
+    if (found) return found;
+    const chosen = heroVariants[Math.random() < 0.5 ? 0 : 1];
+    window.localStorage.setItem("heroVariant", chosen.id);
+    return chosen;
+  } catch {
+    return heroVariants[0];
+  }
+}
+
 export default function Index() {
+  const [heroVariant] = useState(pickHeroVariant);
   const [showBetaDialog, setShowBetaDialog] = useState(false);
   const [showAllIndustries, setShowAllIndustries] = useState(false);
   const [appIdea, setAppIdea] = useState("");
@@ -298,11 +331,11 @@ export default function Index() {
         <div className="container flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-12 py-4 sm:py-8">
           <div className="flex-1 text-center lg:text-left space-y-4 sm:space-y-8">
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-4xl lg:text-[64px] font-normal leading-tight sm:leading-none">
-                Team as a Service
+              <h1 data-hero-variant={heroVariant.id} className="text-2xl sm:text-4xl lg:text-[64px] font-normal leading-tight sm:leading-none">
+                {heroVariant.headline}
               </h1>
               <p className="text-base sm:text-2xl lg:text-[24px] font-normal leading-tight text-muted-foreground">
-                On-demand AI + human experts for marketing, development & growth.
+                {heroVariant.subheadline}
               </p>
             </div>
 
