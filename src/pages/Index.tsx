@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { WorkflowSection } from "@/components/WorkflowSection";
 import { TeamSection } from "@/components/TeamSection";
+import { SkipToContent } from "@/components/SkipToContent";
+import { HeroVariantB } from "@/components/HeroVariantB";
 import { Link } from "react-router-dom";
 
 type CrmFeature = {
@@ -167,7 +169,7 @@ export function CrmFeatures() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="space-y-4 p-6 border rounded-lg cursor-help transition-all hover:shadow-lg">
+                      <div className="hover-lift space-y-4 p-6 border rounded-lg cursor-help bg-card">
                         {feature.content}
                         <h3 className="text-2xl font-semibold">{feature.title}</h3>
                       </div>
@@ -222,6 +224,22 @@ const heroVariants = [
   },
 ] as const;
 
+// Explicit layout override via the URL, e.g. `?variant=b` forces the variant-B
+// hero and `?variant=a` forces the control. This lets us deep-link either arm
+// (for demos, QA and stakeholder review) independent of the random bucketing
+// used for organic traffic. Returns "a", "b", or null when unset.
+function getHeroLayoutOverride(): "a" | "b" | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const value = new URLSearchParams(window.location.search)
+      .get("variant")
+      ?.toLowerCase();
+    return value === "a" || value === "b" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 function pickHeroVariant() {
   if (typeof window === "undefined") return heroVariants[0];
   try {
@@ -238,6 +256,8 @@ function pickHeroVariant() {
 
 export default function Index() {
   const [heroVariant] = useState(pickHeroVariant);
+  const [heroLayoutOverride] = useState(getHeroLayoutOverride);
+  const showHeroVariantB = heroLayoutOverride === "b";
   const [showBetaDialog, setShowBetaDialog] = useState(false);
   const [showAllIndustries, setShowAllIndustries] = useState(false);
   const [appIdea, setAppIdea] = useState("");
@@ -316,17 +336,41 @@ export default function Index() {
     }, 100);
   };
   if (!imagesLoaded) {
-    return <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="w-full max-w-md space-y-4">
-          <Progress value={loadingProgress} className="w-full" />
-          <p className="text-center text-muted-foreground">Loading content... {Math.round(loadingProgress)}%</p>
+    return <div className="aurora min-h-screen flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-sm space-y-8 text-center animate-fade-up">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-4xl font-semibold tracking-tight text-gradient">TaaS</span>
+            <span className="h-2 w-2 rounded-full bg-foreground/70 animate-pulse" />
+          </div>
+          <div className="space-y-3">
+            <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-foreground transition-[width] duration-300 ease-out"
+                style={{ width: `${Math.max(6, Math.round(loadingProgress))}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+              <span className="uppercase tracking-widest">Preparing your workspace</span>
+              <span className="tabular-nums">{Math.round(loadingProgress)}%</span>
+            </div>
+          </div>
         </div>
       </div>;
   }
   return <div className="min-h-screen">
+      <SkipToContent />
       <Navigation />
-      
-      {/* Hero Section - Mobile Optimized */}
+      <main id="main-content" tabIndex={-1}>
+      {/* Hero Section - Mobile Optimized. `?variant=b` swaps in a distinct,
+          single-column, conversion-focused hero (see HeroVariantB). */}
+      {showHeroVariantB ? (
+        <HeroVariantB
+          prompt={prompt}
+          setPrompt={setPrompt}
+          onStartBuild={handleStartBuild}
+          onGetDemo={() => setShowBetaDialog(true)}
+        />
+      ) : (
       <section className="min-h-screen flex flex-col px-4 sm:px-6 pt-16 sm:pt-20">
         <div className="container flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-12 py-4 sm:py-8">
           <div className="flex-1 text-center lg:text-left space-y-4 sm:space-y-8">
@@ -390,7 +434,7 @@ export default function Index() {
               <div className="relative rounded-lg overflow-hidden shadow-xl">
                 {!showVideo ? (/* GIF with Play Button Overlay */
               <div className="relative cursor-pointer" onClick={() => setShowVideo(true)}>
-                    <img src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749059432/WhatsAppVideo2025-06-03at19.05.19-ezgif.com-video-to-gif-converter_vxmpou.gif" alt="Team as a Service Demo" className="w-full aspect-[4/3] sm:aspect-video object-cover" />
+                    <img src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749059432/WhatsAppVideo2025-06-03at19.05.19-ezgif.com-video-to-gif-converter_vxmpou.gif" alt="Team as a Service Demo" loading="lazy" decoding="async" className="w-full aspect-[4/3] sm:aspect-video object-cover" />
                     
                     {/* Play Button Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
@@ -478,6 +522,7 @@ export default function Index() {
           </div>
         </div>
       </section>
+      )}
 
       <CrmFeatures />
 
@@ -495,7 +540,7 @@ export default function Index() {
               {builtProjects.map((project, index) => <CarouselItem key={index}>
                   <Card className="overflow-hidden cursor-pointer" onClick={() => setSelectedApp(project)}>
                     <div className="aspect-video relative overflow-hidden rounded-t-lg">
-                      <img src={project.image} alt={project.title} className="object-cover w-full h-full" />
+                      <img src={project.image} alt={project.title} loading="lazy" decoding="async" className="object-cover w-full h-full" />
                     </div>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
@@ -509,7 +554,7 @@ export default function Index() {
           </Carousel> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {builtProjects.map((project, index) => <Card key={index} className="overflow-hidden transform hover:scale-105 transition-transform duration-200 cursor-pointer" onClick={() => setSelectedApp(project)}>
                 <div className="aspect-video relative overflow-hidden rounded-t-lg">
-                  <img src={project.image} alt={project.title} className="object-cover w-full h-full" />
+                  <img src={project.image} alt={project.title} loading="lazy" decoding="async" className="object-cover w-full h-full" />
                 </div>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
@@ -546,7 +591,7 @@ export default function Index() {
                 <div className="relative rounded-lg overflow-hidden shadow-xl">
                   {!showTestimonialVideo ? (/* GIF Thumbnail with Play Button */
                 <div className="relative cursor-pointer group" onClick={handleTestimonialVideoPlay}>
-                      <img src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749324243/VN20250607-002652-vmake-unscreen_klhnog.gif" alt="Client testimonial preview" className="w-full aspect-video object-cover" />
+                      <img src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749324243/VN20250607-002652-vmake-unscreen_klhnog.gif" alt="Client testimonial preview" loading="lazy" decoding="async" className="w-full aspect-video object-cover" />
                       
                       {/* Play Button Overlay */}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
@@ -572,7 +617,7 @@ export default function Index() {
             <div className="flex-1 space-y-6">
               {/* Profile Section */}
               <div className="flex items-center gap-4">
-                <img alt="Olha Metofor" className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749327577/Screenshot_2025-06-08_at_1.19.24_AM_qsp1fe.png" />
+                <img alt="Olha Metofor" loading="lazy" decoding="async" className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" src="https://res.cloudinary.com/dg4qodgmz/image/upload/v1749327577/Screenshot_2025-06-08_at_1.19.24_AM_qsp1fe.png" />
                 <div>
                   <h3 className="text-xl font-semibold">Natali
  Shevaniuk</h3>
@@ -631,6 +676,8 @@ export default function Index() {
                         <img 
                           src={feature.image} 
                           alt={feature.title} 
+                          loading="lazy"
+                          decoding="async"
                           className="rounded-lg shadow-lg w-full h-full object-cover" 
                         />
                       </div>
@@ -656,7 +703,7 @@ export default function Index() {
                   <p className="text-muted-foreground">{feature.description}</p>
                 </div>
                 <div className="flex-1">
-                  <img src={feature.image} alt={feature.title} className="rounded-lg shadow-lg w-full" />
+                  <img src={feature.image} alt={feature.title} loading="lazy" decoding="async" className="rounded-lg shadow-lg w-full" />
                 </div>
               </div>
             ))}
@@ -762,6 +809,8 @@ export default function Index() {
             </div>)}
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="border-t py-12 mt-20">
