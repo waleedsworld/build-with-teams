@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // The landing page is the first thing anyone sees, so we ship it eagerly.
 import Index from "./pages/Index";
+import { CommandPalette } from "./components/CommandPalette";
 
 // Everything else is lazy-loaded so the initial bundle stays lean. Each route
 // becomes its own chunk that only downloads when a visitor actually asks for it.
@@ -18,6 +19,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const TaskPage = lazy(() => import("./pages/TaskPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const BoardPage = lazy(() => import("./pages/BoardPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
@@ -44,6 +46,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TooltipProvider>
+          <CommandPalette />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -53,6 +56,7 @@ const App = () => (
               <Route path="/task" element={<TaskPage />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/board" element={<BoardPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/careers/test" element={<CareersTestPage />} />
