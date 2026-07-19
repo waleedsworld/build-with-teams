@@ -229,7 +229,7 @@ const ApiTestPage = () => {
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground break-all">
                 Example: https://jpaxhfoyaytpmcqlwrfv.supabase.co/storage/v1/object/public/videos/video_1747381619527.webm
               </p>
             </div>
@@ -301,7 +301,7 @@ const ApiTestPage = () => {
           <CardContent>
             <div className="prose prose-sm max-w-none dark:prose-invert">
               <h3>Endpoint</h3>
-              <pre className="bg-secondary p-2 rounded-md">POST https://test.applytocollege.pk/submit</pre>
+              <pre className="bg-secondary p-2 rounded-md overflow-x-auto whitespace-pre-wrap break-all">POST https://test.applytocollege.pk/submit</pre>
               
               <h3>Description</h3>
               <p>
@@ -310,7 +310,8 @@ const ApiTestPage = () => {
               </p>
               
               <h3>Request Parameters</h3>
-              <table className="w-full border-collapse">
+              <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[420px]">
                 <thead>
                   <tr>
                     <th className="text-left py-2">Field</th>
@@ -352,7 +353,8 @@ const ApiTestPage = () => {
                   </tr>
                 </tbody>
               </table>
-              
+              </div>
+
               <h3>Response Format</h3>
               <pre className="bg-secondary p-2 rounded-md overflow-x-auto text-xs">
 {`{

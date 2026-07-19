@@ -65,6 +65,15 @@
   * {
     @apply border-border;
   }
+  html,
+  body {
+    /* Robustness: contain off-screen entrance animations (framer-motion x
+       offsets, marquees) so they never trigger a horizontal page scroll on
+       mobile. `clip` (unlike `hidden`) does not create a scroll container and
+       does not break `position: sticky`, so sticky headers keep working.
+       Applied on <html> too because that is the viewport scroll container. */
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: "Inter", sans-serif;
@@ -102,5 +111,263 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+/* ==========================================================================
+   UI polish layer — refinement pass over the base design system.
+   Additive only: custom scrollbars, refined focus rings, smooth motion,
+   and a small kit of reusable interaction utilities. Honors reduced-motion.
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tighter, more confident display type on large headings. */
+  h1,
+  h2 {
+    letter-spacing: -0.02em;
+  }
+
+  /* Branded text selection. */
+  ::selection {
+    background: hsl(var(--foreground) / 0.9);
+    color: hsl(var(--background));
+  }
+
+  /* Elegant focus ring — visible for keyboard users, quiet for mouse users. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.7);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Refined, unobtrusive scrollbar that adapts to the theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.16);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.32);
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  /* Gradient wordmark / accent text. */
+  .text-gradient {
+    background: linear-gradient(
+      120deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--foreground) / 0.55) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Card / tile lift on hover — subtle depth, spring-like easing. */
+  .hover-lift {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s ease;
+    will-change: transform;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 2px hsl(var(--foreground) / 0.04),
+      0 12px 32px -8px hsl(var(--foreground) / 0.14);
+    border-color: hsl(var(--foreground) / 0.16);
+  }
+
+  /* Tactile press feedback for buttons/links. */
+  .press {
+    transition: transform 0.12s ease;
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  /* Shimmering skeleton for loading states. */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: hsl(var(--muted));
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.06),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Ambient aurora backdrop for hero / feature sections. */
+  .aurora {
+    position: relative;
+    isolation: isolate;
+  }
+  .aurora::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 120%;
+    z-index: -1;
+    background:
+      radial-gradient(
+        40% 50% at 20% 20%,
+        hsl(var(--foreground) / 0.06),
+        transparent 70%
+      ),
+      radial-gradient(
+        35% 45% at 85% 15%,
+        hsl(var(--foreground) / 0.05),
+        transparent 70%
+      );
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  /* Fine hairline top-border used for scroll-aware headers. */
+  .glass-nav {
+    background: hsl(var(--background) / 0.72);
+    backdrop-filter: saturate(1.6) blur(14px);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    border-bottom: 1px solid hsl(var(--border) / 0.7);
+  }
+
+  /* Staggered entrance — pair with inline animation-delay. */
+  .animate-fade-up {
+    animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Underline that grows from the left on hover. */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1.5px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect users who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Also silence the marquee logo scroll and slide-up reveals (a11y-perf). */
+  .animate-scroll-left,
+  .animate-slide-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Accessibility enhancements (a11y-perf): skip link + focus ring     */
+/* ------------------------------------------------------------------ */
+@layer base {
+  /*
+   * Skip link: visually hidden until it receives keyboard focus, then it
+   * slides into the top-left so keyboard and screen-reader users can jump
+   * straight past the navigation to the main content.
+   */
+  .skip-to-content {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+    transform: translateY(-150%);
+    transition: transform 0.18s ease-out;
+  }
+  .skip-to-content:focus {
+    transform: translateY(0);
+    outline: none;
+  }
+
+  /*
+   * Visible focus ring for keyboard users only. Mouse clicks don't trigger
+   * :focus-visible, so this stays out of the way for pointer users while
+   * giving keyboard users a clear, consistent indicator everywhere.
+   */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 }

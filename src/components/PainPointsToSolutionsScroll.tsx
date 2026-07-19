@@ -127,6 +127,8 @@ export const PainPointsToSolutionsScroll = () => {
                     <img 
                       src={item.solutionImageUrl} 
                       alt={`Solution for ${item.problem}`} 
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-contain"
                     />
                   </div>

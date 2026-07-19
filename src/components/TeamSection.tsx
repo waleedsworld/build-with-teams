@@ -244,6 +244,8 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
                 <img 
                   src={member.gifUrl}
                   alt={`${member.name} - ${member.role}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div 

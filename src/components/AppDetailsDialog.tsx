@@ -29,6 +29,8 @@ export function AppDetailsDialog({ open, onOpenChange, app }: AppDetailsDialogPr
             <img
               src={app.image}
               alt={app.title}
+              loading="lazy"
+              decoding="async"
               className="object-cover w-full h-full"
             />
           </div>

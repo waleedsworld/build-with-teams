@@ -48,7 +48,7 @@ export default function TaskPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-6">
                 <div>
                   <p className="text-sm text-muted-foreground">Assigned to</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -60,14 +60,14 @@ export default function TaskPage() {
                   </div>
                 </div>
 
-                <Separator orientation="vertical" className="h-8" />
+                <Separator orientation="vertical" className="hidden h-8 sm:block" />
 
                 <div>
                   <p className="text-sm text-muted-foreground">Due Date</p>
                   <p className="text-sm font-medium mt-1">May 1, 2025</p>
                 </div>
 
-                <Separator orientation="vertical" className="h-8" />
+                <Separator orientation="vertical" className="hidden h-8 sm:block" />
 
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
@@ -83,7 +83,7 @@ export default function TaskPage() {
                   </Select>
                 </div>
 
-                <Separator orientation="vertical" className="h-8" />
+                <Separator orientation="vertical" className="hidden h-8 sm:block" />
 
                 <div>
                   <p className="text-sm text-muted-foreground">Priority</p>
