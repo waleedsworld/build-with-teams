@@ -3,17 +3,18 @@
 > Spin up a full product team on demand — designers, engineers, PMs, and an
 > AI copilot that actually ships. **Build with teams, not headcount.**
 
-TaaS is the marketing site and product surface for a "team-as-a-service"
-platform. A visitor drops in an idea, and the site walks them through the whole
-journey: from a punchy landing page, through a career/personality funnel, all
-the way to workspace, calendar, task, and dashboard mockups that show what
-working *with* your on-demand team feels like.
+TaaS is the marketing site *and* interactive product surface for a
+"team-as-a-service" platform. A visitor drops in an idea, and the site walks
+them through the whole journey: from a punchy, motion-polished landing page,
+through a career/personality funnel, all the way to a **live drag-and-drop Team
+Board**, workspace, calendar, and dashboard mockups that show what working
+*with* your on-demand team actually feels like.
 
-It's built as a fast single-page app with React, Vite, Tailwind, and shadcn/ui,
+It's a fast single-page app built with React, Vite, Tailwind, and shadcn/ui,
 with a Supabase backend handling waitlist signups and confirmation emails.
 
 <p align="center">
-  <img src="docs/media/demo.gif" alt="TaaS product walkthrough" width="90%" />
+  <img src="docs/media/demo.gif" alt="TaaS product walkthrough — landing page, command palette, and the interactive Team Board" width="90%" />
 </p>
 
 <p align="center">
@@ -22,46 +23,74 @@ with a Supabase backend handling waitlist signups and confirmation emails.
 
 ---
 
-## ✨ What's inside
+## 🆕 What's new in this release
 
-- **A landing page that sells** — hero, "How does an AI TaaS team work?" flow,
-  a gallery of things the team has built, testimonials, industries served, and
-  a clean pricing table. Light *and* dark, courtesy of a system-aware theme.
-- **A/B-tested hero copy** *(new)* — visitors are bucketed 50/50 into one of two
-  hero pitches (*"Team as a Service"* vs *"Ship faster with a team on tap"*).
-  The choice is persisted in `localStorage` so the message stays consistent
-  across reloads while we learn which pitch converts. Zero dependencies, no
-  flicker. See both variants in the screenshot table below.
-- **19 real routes** — pricing, about, a full careers board with job detail
-  pages, a personality/careers test funnel, an AI-marketing page, a fashion
-  case study, plus workspace, calendar, task, and employee dashboard mockups.
-- **A career funnel with personality questions** — apply, answer, and land on a
-  success page. Great for showing off the "we match people to teams" story.
-- **Waitlist + beta signup** — wired to Supabase Edge Functions that send
-  confirmation and waitlist emails.
-- **Mobile-first, keyboard-friendly UI** — every page collapses gracefully to a
-  slide-out nav on small screens.
+This cut is a deep polish-and-power pass. Eight focused work streams landed
+at once — here's the headline act:
+
+| ✨ New | What it does |
+| --- | --- |
+| **🗂 Interactive Team Board** | A full Kanban at [`/board`](https://taas.techrealm.ai/board) — drag cards across Backlog → To Do → In Progress → Done, filter by priority, search, add tasks, and watch a live progress bar. State persists to `localStorage`, so your board is right where you left it on reload. |
+| **⌘ Command Palette** | Hit **⌘K / Ctrl-K** anywhere to fuzzy-jump between pages, flip the theme, and fire quick actions — no mouse required. |
+| **🎨 UI polish pass** | A scroll-aware **frosted-glass nav** that settles into place as you scroll, a branded preloader that *can't* get stuck, custom scrollbars, refined focus rings, and a small kit of reusable interaction utilities — all honoring `prefers-reduced-motion`. |
+| **♿ Accessibility + perf** | Skip-to-content link, keyboard-only focus rings, labelled landmarks, lazy/decoded images, and motion that respects your OS preference. |
+| **🧪 A/B hero — copy *and* layout** | A dependency-free 50/50 headline split test, **plus** an alternate single-column conversion hero at `?variant=b`. Both deterministic and deep-linkable. |
+| **🔎 SEO & discoverability** | Full Open Graph + Twitter cards, JSON-LD structured data, `sitemap.xml`, a PWA `webmanifest`, and a complete favicon set. |
+| **📱 Mobile robustness** | Squashed horizontal-overflow bugs on the Task, API-Test, and AI-Marketing pages so nothing spills off small screens. |
+| **✅ Real test suite** | 35 unit tests (Vitest + Testing Library), a Playwright e2e smoke spec, and a CI workflow — green on every push. |
+
+---
+
+## 🗂 The Team Board, up close
+
+The star of this release. Everything you'd expect from a real board, in zero
+external state libraries — just React + the native HTML drag-and-drop API.
+
+<p align="center">
+  <img src="docs/media/board-desktop.png" alt="The interactive drag-and-drop Team Board with four columns, priority filter, search, and a live progress bar" width="90%" />
+</p>
+
+- **Drag-and-drop** cards between four columns; drops save instantly.
+- **Live progress** — a "2 of 7 done (29%)" meter updates as work moves to Done.
+- **Search + priority filter** to slice a busy board down to what matters.
+- **Add / reset** tasks on the fly.
+- **Persistent** — your layout is written to `localStorage`, so a refresh never
+  loses your place.
+
+---
+
+## ⌘ Command palette (⌘K / Ctrl-K)
+
+<p align="center">
+  <img src="docs/media/command-palette.png" alt="The global command palette opened over the landing page, filtering navigation and appearance actions" width="80%" />
+</p>
+
+Press **⌘K** (or **Ctrl-K**) on any page to open a keyboard-first launcher:
+type to fuzzy-match a destination, jump to any route, or toggle the theme —
+then `Esc` to dismiss. Power users, rejoice. 🕹️
 
 ---
 
 ## 📸 Screenshots
 
-| Hero variant A (light) | Hero variant B (dark) |
+| Hero (desktop, light) | Hero (desktop, dark) |
 | :---: | :---: |
-| ![Landing, light, variant A](docs/media/home-light.png) | ![Landing, dark, variant B](docs/media/home-dark.png) |
+| ![Landing, light](docs/media/hero-desktop-light.png) | ![Landing, dark](docs/media/hero-desktop-dark.png) |
 
-> **Same page, two pitches.** The A/B bucket decides which headline greets a
-> visitor — captured here in the wild, light landing on A and dark on B.
+> **One page, two themes.** A system-aware toggle keeps light and dark equally
+> loved — and the scroll-aware nav frosts over on the way down.
 
 | Mobile | Pricing | Employee dashboard |
 | :---: | :---: | :---: |
-| ![Responsive mobile layout](docs/media/home-mobile.png) | ![Pricing page](docs/media/pricing.png) | ![Employee dashboard](docs/media/dashboard.png) |
+| ![Responsive mobile layout](docs/media/hero-mobile.png) | ![Pricing page](docs/media/pricing.png) | ![Employee dashboard](docs/media/dashboard.png) |
 
 ---
 
 ## 🧪 The A/B hero test, in 20 seconds
 
-No feature-flag service, no extra bundle weight — just a tiny, honest split test:
+No feature-flag service, no extra bundle weight — just two honest split tests:
+
+**1. Copy split (automatic, 50/50).**
 
 ```ts
 // src/pages/Index.tsx
@@ -71,11 +100,16 @@ const heroVariants = [
 ];
 ```
 
-On first visit a variant is chosen (50/50), stored under `localStorage.heroVariant`,
+On first visit a variant is chosen 50/50, stored under `localStorage.heroVariant`,
 and reused forever after. The rendered `<h1>` carries a `data-hero-variant`
 attribute so analytics (or a curious QA engineer) can tell which bucket a
 session landed in. Want to *always* see variant B? Pop the console and run
 `localStorage.setItem('heroVariant','B')`, then reload. Science! 🧬
+
+**2. Layout split (deterministic, deep-linkable).** Append **`?variant=b`** for
+an alternate centered, single-column conversion hero (`?variant=a` forces the
+control). Perfect for demos and QA — see
+[`docs/hero-ab-variant.md`](docs/hero-ab-variant.md).
 
 ---
 
@@ -86,11 +120,12 @@ session landed in. Want to *always* see variant B? Pop the console and run
 | Framework  | React 18 + TypeScript                               |
 | Build tool | Vite 5 (SWC)                                         |
 | Styling    | Tailwind CSS + shadcn/ui (Radix primitives)         |
-| Motion     | Framer Motion                                       |
+| Motion     | Framer Motion, reduced-motion aware                 |
 | Data/state | TanStack Query, React Hook Form + Zod               |
 | Charts     | Recharts                                            |
 | Backend    | Supabase (Postgres, Storage, Edge Functions)        |
 | Routing    | React Router v6 with lazy-loaded route chunks       |
+| Testing    | Vitest + Testing Library, Playwright e2e, GitHub CI |
 
 ---
 
@@ -123,6 +158,13 @@ npm run build     # outputs an optimized bundle to dist/
 npm run preview   # serve the production build locally to sanity-check it
 ```
 
+### Run the tests
+
+```sh
+npm test          # unit + component tests (Vitest)
+npm run test:e2e  # Playwright end-to-end smoke test
+```
+
 ---
 
 ## 🔌 Supabase (optional, for signups & emails)
@@ -149,15 +191,17 @@ If you want to point it at **your own** project:
 ```
 build-with-teams/
 ├── docs/media/        # GIF demo + screenshots used by this README
-├── public/            # static assets, email templates, uploads
+├── public/            # static assets, email templates, SEO files, favicons
 ├── src/
-│   ├── components/     # navigation, sections, dialogs + shadcn/ui kit
-│   ├── pages/          # 19 route components (lazy-loaded)
+│   ├── components/     # navigation, sections, CommandPalette, dialogs + shadcn/ui kit
+│   ├── pages/          # 20 route components (lazy-loaded), incl. BoardPage
 │   ├── data/           # job listings, seed content
 │   ├── hooks/          # use-mobile, use-toast, …
 │   ├── integrations/   # supabase client + generated types
-│   ├── App.tsx         # router + providers
+│   ├── test/           # Vitest setup
+│   ├── App.tsx         # router + providers + command palette
 │   └── main.tsx        # entry point
+├── tests/e2e/          # Playwright smoke spec
 ├── supabase/           # migrations + edge functions
 └── vite.config.ts
 ```
@@ -169,6 +213,7 @@ build-with-teams/
 | Path                  | What it shows                          |
 | --------------------- | -------------------------------------- |
 | `/`                   | The main landing page (A/B hero)       |
+| `/board`              | **New!** Interactive drag-and-drop Team Board |
 | `/pricing`            | Starter / Pro / Enterprise plans       |
 | `/about`              | Company story                          |
 | `/careers`            | Job board (`/careers/:jobId` for each) |
@@ -179,6 +224,8 @@ build-with-teams/
 | `/ai-marketing`       | AI-marketing landing                   |
 | `/fashion-case-study` | Case study page                        |
 
+> 💡 Can't remember a path? Just press **⌘K**.
+
 ---
 
 ## 🌐 Live demo
@@ -187,19 +234,5 @@ build-with-teams/
 Pages. Prefer local? You're a minute away with the steps above.
 
 ---
-
-## 📝 Notes on this build
-
-A few engineering niceties baked into this cut:
-
-- **A/B-tested hero copy.** A dependency-free 50/50 split test on the headline,
-  persisted per visitor, with a `data-hero-variant` hook for analytics.
-- **Route-level code splitting.** Every page is lazy-loaded, so the initial
-  bundle only carries the landing page. The main chunk dropped from ~986 kB to
-  ~396 kB, and heavy vendors (React, Recharts) live in their own long-cache
-  chunks.
-- **A preloader that can't get stuck.** The landing page waits on CDN images,
-  but falls back to rendering after a short grace period — no more infinite
-  spinner if one image hangs.
 
 Built with care by **Waleed Ajmal**.
